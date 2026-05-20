@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Fleet Monitor | Real-time System</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0a1528;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 170, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 170, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 50px;
+            background: transparent;
+            border-bottom: 1px solid rgba(74, 201, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .top-nav::before, .top-nav::after {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 120px;
+            background: linear-gradient(90deg, transparent, rgba(74, 201, 255, 0.25), transparent);
+            animation: scan 4s infinite linear;
+        }
+        .top-nav::before { left: -120px; top: 0; }
+        .top-nav::after { right: -120px; top: 0; animation-delay: 2s; }
+
+        @keyframes scan {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(1800px); }
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(90deg, 
+                rgba(0, 85, 255, 0.15), 
+                rgba(0, 136, 255, 0.2), 
+                rgba(0, 85, 255, 0.15));
+            padding: 0 40px;
+            clip-path: polygon(
+                20px 0%, 
+                calc(100% - 20px) 0%, 
+                100% 50%, 
+                calc(100% - 20px) 100%, 
+                20px 100%, 
+                0% 50%
+            );
+            border: 1px solid rgba(0, 170, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 136, 255, 0.3);
+        }
+        .nav-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(74, 201, 255, 0.8);
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+            position: relative;
+        }
+
+        .left-panel {
+            width: 260px;
+            background: transparent;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .status-card, .vehicle-container {
+            background: linear-gradient(180deg, rgba(11, 42, 90, 0.65), rgba(10, 31, 66, 0.65));
+            border: 1px solid rgba(74, 201, 255, 0.4);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 0 15px rgba(74, 201, 255, 0.2);
+            position: relative;
+        }
+
+        .status-card::before, .status-card::after,
+        .vehicle-container::before, .vehicle-container::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(74, 201, 255, 0.7);
+        }
+        .status-card::before, .vehicle-container::before {
+            top: -1px; left: -1px;
+            border-right: none; border-bottom: none;
+        }
+        .status-card::after, .vehicle-container::after {
+            bottom: -1px; right: -1px;
+            border-left: none; border-top: none;
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4ac9ff;
+            text-shadow: 0 0 8px rgba(74, 201, 255, 0.5);
+            border-bottom: 1px solid rgba(74, 201, 255, 0.2);
+            padding-bottom: 5px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #a0d8ff;
+        }
+
+        .alert-item {
+            color: #ff4d4f;
+            text-shadow: 0 0 8px rgba(255, 77, 79, 0.5);
+        }
+
+        .speed-bar {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #4a9eff, #4aff77, #ffaa00, #ff4d4f);
+            border-radius: 3px;
+            margin: 8px 0;
+            box-shadow: 0 0 5px rgba(74, 201, 255, 0.3);
+        }
+
+        .vehicle-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .vehicle-item {
+            background: linear-gradient(180deg, rgba(11, 58, 120, 0.7), rgba(8, 42, 90, 0.7));
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(0, 170, 255, 0.25);
+            box-shadow: 0 0 8px rgba(0, 100, 200, 0.15);
+        }
+
+        .vehicle-item.active {
+            border-left-color: #4aff77 !important;
+            background: linear-gradient(180deg, rgba(15, 84, 136, 0.8), rgba(10, 58, 104, 0.8)) !important;
+            transform: translateX(4px);
+            box-shadow: 0 0 15px rgba(74, 255, 119, 0.4);
+            border-color: rgba(74, 255, 119, 0.5);
+        }
+
+        .vehicle-item.alert {
+            border-left-color: #ff4d4f;
+            background: linear-gradient(180deg, rgba(74, 26, 26, 0.7), rgba(43, 26, 26, 0.7));
+            border-color: rgba(255, 77, 79, 0.3);
+        }
+
+        .vehicle-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .center-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: url("1.svg") no-repeat center center;
+            background-size: cover;
+            z-index: 1;
+        }
+
+        #map-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 21, 40, 0.5);
+            pointer-events: none;
+        }
+
+        .map-controls {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(180deg, rgba(11, 58, 120, 0.75), rgba(8, 42, 90, 0.75));
+            border: 1px solid rgba(74, 201, 255, 0.4);
+            border-radius: 4px;
+            color: #4ac9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(74, 201, 255, 0.2);
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(180deg, rgba(15, 84, 168, 0.8), rgba(11, 58, 120, 0.8));
+            box-shadow: 0 0 12px rgba(74, 201, 255, 0.4);
+        }
+
+        /* 移到地图右上角的 Alert Log */
+        .alert-log {
+            position: absolute;
+            top: 15px;
+            right: 60px;
+            width: 280px;
+            background: linear-gradient(180deg, rgba(11, 58, 120, 0.65), rgba(8, 42, 90, 0.65));
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(74, 201, 255, 0.4);
+            box-shadow: 0 0 15px rgba(74, 201, 255, 0.2);
+            z-index: 10;
+        }
+
+        .alert-log::before, .alert-log::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(74, 201, 255, 0.7);
+        }
+        .alert-log::before {
+            top: -1px; left: -1px;
+            border-right: none; border-bottom: none;
+        }
+        .alert-log::after {
+            bottom: -1px; right: -1px;
+            border-left: none; border-top: none;
+        }
+
+        .right-panel {
+            width: 300px;
+            background: transparent;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .detail-card {
+            background: linear-gradient(180deg, rgba(11, 58, 120, 0.65), rgba(8, 42, 90, 0.65));
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(74, 201, 255, 0.4);
+            box-shadow: 0 0 15px rgba(74, 201, 255, 0.2);
+            position: relative;
+        }
+
+        .detail-card::before, .detail-card::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(74, 201, 255, 0.7);
+        }
+        .detail-card::before {
+            top: -1px; left: -1px;
+            border-right: none; border-bottom: none;
+        }
+        .detail-card::after {
+            bottom: -1px; right: -1px;
+            border-left: none; border-top: none;
+        }
+
+        .detail-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            color: #4ac9ff;
+            text-shadow: 0 0 8px rgba(74, 201, 255, 0.5);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+            opacity: 0.85;
+            color: #a0d8ff;
+        }
+
+        .log-item {
+            margin-bottom: 6px;
+            opacity: 0.75;
+            color: #a0d8ff;
+        }
+
+        /* 网络延迟面板，宽度和右侧面板对齐 */
+        .ping-panel {
+            position: absolute;
+            right: 15px;
+            bottom: 20px;
+            width: 270px;
+            background: linear-gradient(180deg, rgba(11, 42, 90, 0.7), rgba(10, 31, 66, 0.7));
+            border: 1px solid rgba(74, 201, 255, 0.5);
+            border-radius: 8px;
+            padding: 14px;
+            box-shadow: 0 0 15px rgba(74, 201, 255, 0.2);
+            z-index: 99;
+        }
+        .ping-title {
+            font-size: 14px;
+            color: #4ac9ff;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-shadow: 0 0 6px rgba(74, 201, 255, 0.5);
+        }
+        .ping-info-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .ping-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .ping-unit {
+            font-size: 13px;
+            color: #a0d8ff;
+        }
+        .ping-car {
+            font-size: 13px;
+            color: #fff;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+        #pingLineChart {
+            width: 100%;
+            height: 120px;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        .weather-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 130, 230, 0.2);
+            height: 100%;
+            padding: 0 20px;
+            border-radius: 0 20px 20px 0;
+            box-shadow: 0 0 10px rgba(74, 201, 255, 0.3);
+            border-right: 1px solid rgba(74, 201, 255, 0.5);
+        }
+        .weather-icon {
+            width: 30px;
+            height: 30px;
+            background: url('https://cdn-icons-png.flaticon.com/512/1163/1163624.png') center/cover no-repeat;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+        }
+        .weather-text {
+            display: flex;
+            gap: 15px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(74, 201, 255, 0.8);
+        }
+        .info-box {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 130, 230, 0.2);
+            height: 100%;
+            padding: 0 20px;
+            border-radius: 20px 0 0 20px;
+            box-shadow: 0 0 10px rgba(74, 201, 255, 0.3);
+            border-left: 1px solid rgba(74, 201, 255, 0.5);
+        }
+        .info-text {
+            display: flex;
+            gap: 25px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(74, 201, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <div class="nav-left">
+        <div class="weather-box">
+            <div class="weather-icon"></div>
+            <div class="weather-text">
+                <span>多云</span>
+                <span>21℃</span>
+                <span>东南4-3级</span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-center">
+        <div class="nav-title">Autonomous Fleet Monitor System</div>
+    </div>
+    <div class="nav-right">
+        <div class="info-box">
+            <div class="info-text">
+                <span id="current-time">2026/05/18 17:23:27</span>
+                <span>系统状态: 正常</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="left-panel">
+        <div class="status-card">
+            <div class="panel-title">FLEET STATUS</div>
+            <div class="status-item"><span>🟢</span><span>Active AVs: <span id="totalCar">2</span> / Total: <span id="totalCar">2</span></span></div>
+            <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Idle: 0 | Maint: 0</div>
+            <div class="status-item alert-item" style="margin-top:10px;"><span>🔺</span><span>Alerts: <span id="alertCount">0</span></span></div>
+            <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Critical: 0 | Warning: 0</div>
+            <div class="status-item" style="margin-top:10px;"><span>⚡</span><span>Avg Speed: <span id="avgSpeed">0</span> km/h</span></div>
+            <div class="speed-bar"></div>
+        </div>
+        <div class="vehicle-container">
+            <div class="panel-title">VEHICLE LIST</div>
+            <div class="vehicle-list" id="vehicleList">
+                <div class="vehicle-item active" data-id="AV-S031">
+                    <div class="vehicle-info"><span>🚗</span><div><div>AV-S031</div><div style="font-size:11px; opacity:0.7;">Active</div></div></div>
+                    <div><div id="car1_speed">0km/h</div><div style="font-size:11px; opacity:0.7;">Batt. <span id="car1_batt">0</span>%</div></div>
+                </div>
+                <div class="vehicle-item" data-id="AV-N055">
+                    <div class="vehicle-info"><span>🚙</span><div><div>AV-N055</div><div style="font-size:11px; opacity:0.7;">Active</div></div></div>
+                    <div><div id="car2_speed">0km/h</div><div style="font-size:11px; opacity:0.7;">Batt. <span id="car2_batt">0</span>%</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="center-panel">
+        <div id="map-container"></div>
+        <div class="map-controls">
+            <div class="control-btn">🔍</div><div class="control-btn">↑</div><div class="control-btn">→</div><div class="control-btn">▤</div><div class="control-btn">—</div>
+        </div>
+        <div class="alert-log">
+            <div class="detail-title">ALERTS LOG</div>
+            <div id="alertLog"></div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="detail-card" id="detailCard">
+            <div class="detail-title"><span>VEHICLE DETAILS | AV-S031</span><span>▾</span></div>
+            <div style="font-size:15px; margin-bottom:10px;">AV-S031 <span style="color:#4aff77;" id="carStatus">(Status: Active)</span></div>
+            <div class="detail-row"><span>Location:</span><span id="carLoc">香港城市大学（东莞）</span></div>
+            <div class="detail-row"><span>Speed:</span><span id="carSpeed">0 km/h</span></div>
+            <div class="detail-row"><span>Battery:</span><span id="carBatt">0%</span></div>
+            <div class="detail-row"><span>Sensor Status:</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">LiDAR: <span id="sLidar">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Camera: <span id="sCam">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Radar: <span id="sRadar">OK</span></div>
+            <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div>
+        </div>
+    </div>
+
+    <div class="ping-panel">
+        <div class="ping-title">📶 NETWORK LATENCY MONITOR</div>
+        <div class="ping-info-row">
+            <span class="ping-value" id="pingValue">0</span>
+            <span class="ping-unit">ms</span>
+        </div>
+        <div class="ping-car" id="pingCar">Vehicle: AV-S031</div>
+        <div id="pingLineChart"></div>
+    </div>
+</div>
+
+<script>
+    let currentCar = "AV-S031";
+    let carData = {};
+    let pingHistory = [];
+    const MAX_PING_LEN = 15;
+
+    const mapChart = echarts.init(document.getElementById('map-container'));
+    const pingChart = echarts.init(document.getElementById('pingLineChart'));
+
+    mapChart.setOption({
+        backgroundColor: 'transparent',
+        xAxis: { show: false, min: 0, max: 100 },
+        yAxis: { show: false, min: 0, max: 100 },
+        series: [{
+            type: 'scatter', zlevel:10, symbol:'pin', symbolSize:28,
+            data: [
+                { value: [30,45], name: 'AV-S031', itemStyle: { color: '#4aff77' } },
+                { value: [50,60], name: 'AV-N055', itemStyle: { color: '#4a9eff' } }
+            ],
+            label: { show:true, position:'bottom', formatter:'{b}', color:'#fff', backgroundColor:'rgba(0,0,0,.7)' }
+        }]
+    });
+
+    function initPingChart(color="#4aff77"){
+        pingChart.setOption({
+            tooltip: { trigger:'axis', backgroundColor:'rgba(0,30,60,.8)', textStyle:{color:'#fff'} },
+            grid: { left:10, right:10, top:15, bottom:20 },
+            xAxis: { type:'category', data:[], axisLine:{color:'rgba(74,201,255,.3)'}, axisLabel:{show:false} },
+            yAxis: { type:'value', splitLine:{color:'rgba(74,201,255,.15)'}, axisLabel:{color:'#a0d8ff',fontSize:10} },
+            series: [{
+                type:'line', smooth:true, symbol:'none', lineStyle:{color,width:2},
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[
+                    {offset:0, color:color+'60'},{offset:1, color:color+'05'}
+                ])},
+                data:[]
+            }]
+        });
+    }
+    initPingChart();
+
+    const ws = new WebSocket('ws://localhost:8888');
+    ws.onmessage = (e) => {
+        carData = JSON.parse(e.data);
+        refreshAllUI();
+    };
+
+    function refreshAllUI() {
+        document.getElementById("car1_speed").innerText = carData.AV_S031.speed + "km/h";
+        document.getElementById("car1_batt").innerText = carData.AV_S031.battery;
+        document.getElementById("car2_speed").innerText = carData.AV_N055.speed + "km/h";
+        document.getElementById("car2_batt").innerText = carData.AV_N055.battery;
+
+        const car1 = document.querySelector('[data-id="AV-S031"]');
+        const car2 = document.querySelector('[data-id="AV-N055"]');
+
+        const aFault = carData.AV_S031.lidar === "Fault" || carData.AV_S031.camera === "Degraded";
+        const bFault = carData.AV_N055.lidar === "Fault" || carData.AV_N055.camera === "Degraded";
+
+        if (aFault) {
+            car1.style.setProperty('border-left', '4px solid #ff4d4f', 'important');
+        } else {
+            car1.style.setProperty('border-left', '3px solid transparent', 'important');
+        }
+
+        if (bFault) {
+            car2.style.setProperty('border-left', '4px solid #ff4d4f', 'important');
+        } else {
+            car2.style.setProperty('border-left', '3px solid transparent', 'important');
+        }
+
+        mapChart.setOption({
+            series: [{
+                data: [
+                    { value: carData.AV_S031.gps, name: 'AV-S031', itemStyle: { color: aFault ? '#ff4d4f' : '#4aff77' }, symbolSize: currentCar=="AV-S031"?40:28 },
+                    { value: carData.AV_N055.gps, name: 'AV-N055', itemStyle: { color: bFault ? '#ff4d4f' : '#4a9eff' }, symbolSize: currentCar=="AV-N055"?40:28 }
+                ]
+            }]
+        });
+
+        const d = currentCar === "AV-S031" ? carData.AV_S031 : carData.AV_N055;
+        document.getElementById("carSpeed").innerText = d.speed + " km/h";
+        document.getElementById("carBatt").innerText = d.battery + "%";
+        document.getElementById("sLidar").innerText = d.lidar;
+        document.getElementById("sCam").innerText = d.camera;
+        document.getElementById("sRadar").innerText = d.radar;
+        document.getElementById("carAlert").innerText = (d.lidar === "Fault" || d.camera === "Degraded") ? "⚠️ ABNORMAL" : "None";
+        document.getElementById("carStatus").innerText = `(Status: ${(d.lidar === "Fault" || d.camera === "Degraded") ? "ALERT" : "Active"})`;
+        document.getElementById("carStatus").style.color = (d.lidar === "Fault" || d.camera === "Degraded") ? "#ff4d4f" : "#4aff77";
+
+        pingHistory.push(d.ping);
+        if(pingHistory.length>MAX_PING_LEN) pingHistory.shift();
+        document.getElementById("pingValue").innerText = d.ping;
+        document.getElementById("pingValue").style.color = d.ping>100 ? "#ff4d4f" : "#4aff77";
+        pingChart.setOption({
+            xAxis: { data: pingHistory.map((_,i)=>i+1+"s") },
+            series: [{ data: pingHistory }]
+        });
+
+        let alertCount = 0;
+        if(aFault) alertCount++;
+        if(bFault) alertCount++;
+        document.getElementById("alertCount").innerText = alertCount;
+        document.getElementById("avgSpeed").innerText = ((carData.AV_S031.speed + carData.AV_N055.speed)/2).toFixed(0);
+
+        const logBox = document.getElementById("alertLog");
+        const now = new Date().toLocaleTimeString();
+        let log = "";
+
+        if (aFault) {
+            log += `<div class="log-item">[${now}] ⚠️ AV-S031 异常</div>`;
+        }
+        if (bFault) {
+            log += `<div class="log-item">[${now}] ⚠️ AV-N055 异常</div>`;
+        }
+        if (!aFault && !bFault) {
+            log = `<div class="log-item">[${now}] ✅ 全部正常</div>`;
+        }
+
+        logBox.innerHTML = log;
+    }
+
+    document.querySelectorAll(".vehicle-item").forEach(el => {
+        el.onclick = () => {
+            document.querySelectorAll(".vehicle-item").forEach(i=>i.classList.remove("active"));
+            el.classList.add("active");
+            currentCar = el.dataset.id;
+            document.getElementById("pingCar").innerText = "Vehicle: " + currentCar;
+            initPingChart(currentCar=="AV-S031" ? "#4aff77" : "#4a9eff");
+            pingHistory = [];
+            refreshAllUI();
+        };
+    });
+
+    setInterval(()=>{
+        document.getElementById("current-time").innerText = new Date().toLocaleString();
+    },1000);
+
+    window.addEventListener('resize', ()=>{ mapChart.resize(); pingChart.resize(); });
+
+    // ========== 天气模块：自动获取深圳天气并显示到左上角 weather-box ==========
+    async function getWeather() {
+        try {
+            // 免费、无需key、支持跨域、国内可用
+            const res = await fetch("https://wttr.in/Shenzhen?format=j1");
+            const data = await res.json();
+
+            const desc = data.current_condition[0].weatherDesc[0].value;
+            const temp = data.current_condition[0].temp_C;
+            const wind = data.current_condition[0].windspeedKmph;
+
+            // 写进你页面左上角 weather-text
+            document.querySelector(".weather-text").innerHTML =
+                `<span>${desc}</span><span>${temp}℃</span><span>风速 ${wind} km/h</span>`;
+        } catch (e) {
+            console.log("天气获取失败", e);
+        }
+    }
+
+    getWeather();
+    setInterval(getWeather, 5 * 60 * 1000); // 5分钟刷新一次
+</script>
+</body>
+</html>

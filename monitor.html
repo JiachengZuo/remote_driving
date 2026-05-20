@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Fleet Monitor | Real-time System</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 引入独立CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-nav">
+    <div class="nav-left">
+        <div class="weather-box">
+            <div class="weather-icon"></div>
+            <div class="weather-text">
+                <span>多云</span>
+                <span>21℃</span>
+                <span>东南4-3级</span>
+            </div>
+        </div>
+    </div>
+    <div class="nav-center">
+        <div class="nav-title">Autonomous Fleet Monitor System</div>
+    </div>
+    <div class="nav-right">
+        <div class="info-box">
+            <div class="info-text">
+                <span id="current-time">2026/05/18 17:23:27</span>
+                <span>系统状态: 正常</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="left-panel">
+        <div class="status-card">
+            <div class="panel-title">FLEET STATUS</div>
+            <div class="status-item"><span>🟢</span><span>Active AVs: <span id="totalCar">2</span> / Total: <span id="totalCar">2</span></span></div>
+            <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Idle: 0 | Maint: 0</div>
+            <div class="status-item alert-item" style="margin-top:10px;"><span>🔺</span><span>Alerts: <span id="alertCount">0</span></span></div>
+            <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Critical: 0 | Warning: 0</div>
+            <div class="status-item" style="margin-top:10px;"><span>⚡</span><span>Avg Speed: <span id="avgSpeed">0</span> km/h</span></div>
+            <div class="speed-bar"></div>
+        </div>
+        <div class="vehicle-container">
+            <div class="panel-title">VEHICLE LIST</div>
+            <div class="vehicle-list" id="vehicleList">
+                <div class="vehicle-item active" data-id="AV-S031">
+                    <div class="vehicle-info"><span>🚗</span><div><div>AV-S031</div><div style="font-size:11px; opacity:0.7;">Active</div></div></div>
+                    <div><div id="car1_speed">0km/h</div><div style="font-size:11px; opacity:0.7;">Batt. <span id="car1_batt">0</span>%</div></div>
+                </div>
+                <div class="vehicle-item" data-id="AV-N055">
+                    <div class="vehicle-info"><span>🚙</span><div><div>AV-N055</div><div style="font-size:11px; opacity:0.7;">Active</div></div></div>
+                    <div><div id="car2_speed">0km/h</div><div style="font-size:11px; opacity:0.7;">Batt. <span id="car2_batt">0</span>%</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="center-panel">
+        <div id="map-container"></div>
+        <div class="map-controls">
+            <div class="control-btn">🔍</div><div class="control-btn">↑</div><div class="control-btn">→</div><div class="control-btn">▤</div><div class="control-btn">—</div>
+        </div>
+        <div class="alert-log">
+            <div class="detail-title">ALERTS LOG</div>
+            <div id="alertLog"></div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="detail-card" id="detailCard">
+            <div class="detail-title"><span>VEHICLE DETAILS | AV-S031</span><span>▾</span></div>
+            <div style="font-size:15px; margin-bottom:10px;">AV-S031 <span style="color:#4aff77;" id="carStatus">(Status: Active)</span></div>
+            <div class="detail-row"><span>Location:</span><span id="carLoc">香港城市大学（东莞）</span></div>
+            <div class="detail-row"><span>Speed:</span><span id="carSpeed">0 km/h</span></div>
+            <div class="detail-row"><span>Battery:</span><span id="carBatt">0%</span></div>
+            <div class="detail-row"><span>Sensor Status:</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">LiDAR: <span id="sLidar">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Camera: <span id="sCam">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Radar: <span id="sRadar">OK</span></div>
+            <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div>
+        </div>
+    </div>
+
+    <div class="ping-panel">
+        <div class="ping-title">📶 NETWORK LATENCY MONITOR</div>
+        <div class="ping-info-row">
+            <span class="ping-value" id="pingValue">0</span>
+            <span class="ping-unit">ms</span>
+        </div>
+        <div class="ping-car" id="pingCar">Vehicle: AV-S031</div>
+        <div id="pingLineChart"></div>
+    </div>
+</div>
+
+<!-- 引入独立JS -->
+<script src="script.js"></script>
+</body>
+</html>
