@@ -1,3 +1,4 @@
+
 * {
     margin: 0;
     padding: 0;
@@ -203,7 +204,7 @@ body {
     width: 100%;
     height: 100%;
     position: relative;
-    background: url("1.svg") no-repeat center center;
+    background: url("1.jpeg") no-repeat center center;
     background-size: cover;
     z-index: 1;
 }
@@ -215,7 +216,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 21, 40, 0.5);
+    background: rgba(10, 21, 40, 0.2);  /* 改成 0.2 就亮很多 */
     pointer-events: none;
 }
 
@@ -250,6 +251,7 @@ body {
     box-shadow: 0 0 12px rgba(74, 201, 255, 0.4);
 }
 
+/* 移到地图右上角的 Alert Log */
 .alert-log {
     position: absolute;
     top: 15px;
@@ -338,6 +340,7 @@ body {
     color: #a0d8ff;
 }
 
+/* 网络延迟面板，宽度和右侧面板对齐 */
 .ping-panel {
     position: absolute;
     right: 15px;

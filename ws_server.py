@@ -1,15 +1,28 @@
 import asyncio
 import websockets
 import json
-
+import time
 # 你的车辆数据（和大屏完全匹配）
 data_list = [
-    {"AV_S031":{"gps":[30,45],"speed":22,"battery":88,"lidar":"OK","camera":"OK","radar":"OK","ping":32},"AV_N055":{"gps":[50,60],"speed":18,"battery":75,"lidar":"OK","camera":"OK","radar":"OK","ping":28}},
-    {"AV_S031":{"gps":[32,44],"speed":24,"battery":87,"lidar":"OK","camera":"OK","radar":"OK","ping":35},"AV_N055":{"gps":[48,59],"speed":19,"battery":74,"lidar":"OK","camera":"OK","radar":"OK","ping":30}},
-    {"AV_S031":{"gps":[34,43],"speed":26,"battery":86,"lidar":"OK","camera":"OK","radar":"OK","ping":33},"AV_N055":{"gps":[46,58],"speed":20,"battery":73,"lidar":"OK","camera":"OK","radar":"OK","ping":27}},
-    {"AV_S031":{"gps":[36,42],"speed":28,"battery":85,"lidar":"OK","camera":"Degraded","radar":"OK","ping":88},"AV_N055":{"gps":[44,57],"speed":21,"battery":72,"lidar":"Fault","camera":"OK","radar":"OK","ping":198}},
-    {"AV_S031":{"gps":[38,41],"speed":30,"battery":84,"lidar":"OK","camera":"Degraded","radar":"OK","ping":92},"AV_N055":{"gps":[42,56],"speed":0,"battery":71,"lidar":"Fault","camera":"OK","radar":"OK","ping":210}},
+    {"AV_S031":{"gps":[-79.378,88.817],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32}},
+    {"AV_S031":{"gps":[-110.448,10.581],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32}},
+    {"AV_S031":{"gps":[-167.73,-70.10],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32}},
+    {"AV_S031":{"gps":[-183.177,-90.925],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32}},
+    # {"AV_S031":{"gps":[32,44],"speed":24.22222222222,"battery":87.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":35}},
+    # {"AV_N055":{"gps":[46,58],"speed":20,"battery":73,"lidar":"OK","camera":"OK","radar":"OK","ping":27}},
+    # {"AV_N055":{"gps":[44,57],"speed":21,"battery":72,"lidar":"Fault","camera":"OK","radar":"OK","ping":198}},
+    # {"AV_N055":{"gps":[42,56],"speed":0,"battery":71,"lidar":"Fault","camera":"OK","radar":"OK","ping":210}},
+    # {"AV_S031":{"gps":[30,45],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32},"AV_N055":{"gps":[50,60],"speed":18,"battery":75,"lidar":"OK","camera":"OK","radar":"OK","ping":28}},
+    # {"AV_S031":{"gps":[30,45],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":time.time()},
+    #  "AV_N055":{"gps":[50,60],"speed":18,"battery":75,"lidar":"OK","camera":"OK","radar":"OK","ping":time.time()},
+    #  "AV_N077":{"gps":[50,60],"speed":18,"battery":75,"lidar":"OK","camera":"OK","radar":"OK","ping":time.time()}},
 ]
+
+#  {"AV_S031":{"gps":[30,45],"speed":22.22222222222,"battery":88.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":32},"AV_N055":{"gps":[50,60],"speed":18,"battery":75,"lidar":"OK","camera":"OK","radar":"OK","ping":28}},
+#     {"AV_S031":{"gps":[32,44],"speed":24.22222222222,"battery":87.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":35},"AV_N055":{"gps":[48,59],"speed":19,"battery":74,"lidar":"OK","camera":"OK","radar":"OK","ping":30}},
+#     {"AV_S031":{"gps":[34,43],"speed":26.22222222222,"battery":86.22222222222,"lidar":"OK","camera":"OK","radar":"OK","ping":33},"AV_N055":{"gps":[46,58],"speed":20,"battery":73,"lidar":"OK","camera":"OK","radar":"OK","ping":27}},
+#     {"AV_S031":{"gps":[36,42],"speed":28.22222222222,"battery":85.22222222222,"lidar":"OK","camera":"Degraded","radar":"OK","ping":88},"AV_N055":{"gps":[44,57],"speed":21,"battery":72,"lidar":"Fault","camera":"OK","radar":"OK","ping":198}},
+#     {"AV_S031":{"gps":[38,41],"speed":30.22222222222,"battery":84.22222222222,"lidar":"OK","camera":"Degraded","radar":"OK","ping":92},"AV_N055":{"gps":[42,56],"speed":0,"battery":71,"lidar":"Fault","camera":"OK","radar":"OK","ping":210}},
 
 idx = 0
 
