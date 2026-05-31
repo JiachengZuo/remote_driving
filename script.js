@@ -10,22 +10,82 @@ const pingChart = echarts.init(document.getElementById('pingLineChart'));
 // ====================== 【两点精准拟合 - 只对齐前两个点】 ======================
 // GPS (-79.378, 88.817) → 网页 (7.5, 60)
 // GPS (-110.448, 10.581) → 网页 (22, 54)
+const calibrationPoints = [
+    { gps: [-318.479, -135.459], map: [55, 22] },
+    { gps: [-262.664, -17.556],  map: [33, 25] },
+    { gps: [-242.899, 57.969],   map: [20, 23] },
+    { gps: [-186.917, 70.587],   map: [15, 33] },
+    { gps: [-79.378, 88.817],    map: [7.5, 60] },
+    { gps: [-110.448, 10.581],   map: [22, 54] },
+    { gps: [-167.73, -70.12],    map: [37, 47.5] },
+    { gps: [-183.177, -90.925],  map: [41, 45.5] },
+    { gps: [30.418, -10.964],    map: [17, 85] },
+    { gps: [7.023, 11.585],      map: [14.5, 77] },
+    { gps: [-145.645, -2.571],   map: [24, 47] },
+    { gps: [-216.839, -199.682], map: [60, 47] },
+    { gps: [-302.308, -270.715], map: [77, 35] },
+    { gps: [-394.887, -235.785], map: [79, 15] },
+    ];
+// 线性插值核心函数
 function gpsToMap(lon, lat) {
-    const x = -0.4667 * lon - 29.54;
-    const y = 0.0767 * lat + 53.19;
-    return [Number(x.toFixed(1)), Number(y.toFixed(1))];
+const EPS = 1e-8;
+let totalWeight = 0;
+let mapX = 0, mapY = 0;
+
+// 遍历所有标定，做距离加权插值
+for (const p of calibrationPoints) {
+    const [gx, gy] = p.gps;
+    const dx = lon - gx;
+    const dy = lat - gy;
+    const dist = Math.sqrt(dx * dx + dy * dy) + EPS; // 避免除0
+    const weight = 1 / (dist * dist); // 距离平方反比加权
+
+    totalWeight += weight;
+    mapX += p.map[0] * weight;
+    mapY += p.map[1] * weight;
 }
 
+// 归一化
+mapX /= totalWeight;
+mapY /= totalWeight;
+
+return [Number(mapX.toFixed(1)), Number(mapY.toFixed(1))];
+}
 // 初始化地图（空数据）
+
 mapChart.setOption({
-    backgroundColor: 'transparent',
-    xAxis: { show: false, min: 0, max: 100 },
-    yAxis: { show: false, min: 0, max: 100 },
-    series: [{
-        type: 'scatter', zlevel: 10, symbol: 'pin', symbolSize: 28,
-        data: [],
-        label: { show: true, position: 'bottom', formatter: '{b}', color: '#fff', backgroundColor: 'rgba(0,0,0,.7)' }
-    }]
+backgroundColor: 'transparent',
+xAxis: { show: false, min: 0, max: 100 },
+yAxis: { show: false, min: 0, max: 100 },
+series: [{
+    type: 'scatter',
+    zlevel: 1000, // 提到最上层
+    symbol: 'pin',
+    symbolSize: 55, // 更大
+    symbolOffset: [0, -20],
+
+    // 超亮红色 + 白色强描边 + 超强光晕
+    itemStyle: {
+        color: '#FF2222',          // 超亮鲜红
+        borderColor: '#FFFFFF',    // 白色辅助
+        borderWidth: 5,            // 更粗白边
+        shadowBlur: 40,            // 超强发光
+        shadowColor: '#FF4444'     // 超亮红光晕
+    },
+
+    label: {
+        show: true,
+        position: 'bottom',
+        formatter: '{b}',
+        color: '#fff',
+        fontSize: 13,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderRadius: 6,
+        padding: [3, 7],
+        distance: 8
+    },
+    data: []
+}]
 });
 
 function initPingChart(color = "#4aff77") {

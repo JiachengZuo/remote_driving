@@ -582,8 +582,8 @@
     initPingChart();
 
     // WebSocket 接收数据
-    // const ws = new WebSocket('ws://localhost:8888');
-    const ws = new WebSocket('ws://${location.hostname}:8004');
+    const ws = new WebSocket('ws://localhost:8888');
+    // const ws = new WebSocket('ws://${location.hostname}:8004');
     ws.onmessage = (e) => {
         try {
             carData = JSON.parse(e.data);
