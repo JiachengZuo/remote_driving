@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地图坐标拾取器【终极精准】</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0a1528;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-nav {
+            height: 50px;
+            background: #112;
+            border-bottom: 1px solid #fff3;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        .left-panel {
+            width: 260px;
+            background: #223;
+        }
+
+        .center-panel {
+            flex: 1;
+            position: relative;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 100%;
+            background: url("1.jpeg") no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+
+        .right-panel {
+            width: 300px;
+            background: #223;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            z-index: 999;
+            border: 1px solid #0af;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-nav"></div>
+
+<div class="main-container">
+    <div class="left-panel"></div>
+
+    <div class="center-panel">
+        <div id="map-container"></div>
+        <div id="info">点击地图获取精准坐标</div>
+    </div>
+
+    <div class="right-panel"></div>
+</div>
+
+<script>
+const map = document.getElementById('map-container');
+const info = document.getElementById('info');
+
+map.addEventListener('click', (e) => {
+    const rect = map.getBoundingClientRect();
+
+    // 1. 原始点击坐标（左下角原点）
+    const rawX = ((e.clientX - rect.left) / rect.width * 100);
+    const rawY = ((rect.bottom - e.clientY) / rect.height * 100);
+
+    // 2. 🔥 修正你地图的真实原点偏移（你说的 10.2, 9.6）
+    const realX = (rawX).toFixed(1);
+    const realY = (rawY * 1.09 - 10).toFixed(1);
+
+    info.innerText = `真实坐标：X=${realX} ，Y=${realY}`;
+    navigator.clipboard.writeText(`${realX}, ${realY}`);
+});
+</script>
+</body>
+</html>
