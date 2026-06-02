@@ -602,64 +602,6 @@
         { gps: [-105.488, 84.713],   map: [7.8, 46.9] }
     ];
 
-// 精准投影变换：GPS → 屏幕坐标 [x,y]
-// 基于你所有标定点自动计算最优变换矩阵
-// function gpsToMap(gpsX, gpsY) {
-//     // 你的标定数据（直接用你那一组）
-//     const points = calibrationPoints;
-
-//     // 构建最小二乘求解
-//     let A = [], Bx = [], By = [];
-//     for (let p of points) {
-//         const gx = p.gps[0];
-//         const gy = p.gps[1];
-//         const mx = p.map[0];
-//         const my = p.map[1];
-
-//         A.push([gx, gy, 1]);
-//         Bx.push(mx);
-//         By.push(my);
-//     }
-
-//     // 解 Ax = B
-//     function solveLS(A, B) {
-//         const n = A[0].length;
-//         let AtA = Array(n).fill(0).map(() => Array(n).fill(0));
-//         let AtB = Array(n).fill(0);
-
-//         for (let i = 0; i < A.length; i++) {
-//             for (let r = 0; r < n; r++) {
-//                 for (let c = 0; c < n; c++) {
-//                     AtA[r][c] += A[i][r] * A[i][c];
-//                 }
-//                 AtB[r] += A[i][r] * B[i];
-//             }
-//         }
-
-//         // 高斯消元
-//         for (let i = 0; i < n; i++) {
-//             let div = AtA[i][i];
-//             for (let j = i; j < n; j++) AtA[i][j] /= div;
-//             AtB[i] /= div;
-//             for (let j = 0; j < n; j++) {
-//                 if (j !== i && AtA[j][i] !== 0) {
-//                     let factor = AtA[j][i];
-//                     for (let k = i; k < n; k++) AtA[j][k] -= factor * AtA[i][k];
-//                     AtB[j] -= factor * AtB[i];
-//                 }
-//             }
-//         }
-//         return AtB;
-//     }
-
-//     const coeffX = solveLS(A, Bx);
-//     const coeffY = solveLS(A, By);
-
-//     let x = coeffX[0] * gpsX + coeffX[1] * gpsY + coeffX[2];
-//     let y = coeffY[0] * gpsX + coeffY[1] * gpsY + coeffY[2];
-
-//     return [Number(x.toFixed(1)), Number(y.toFixed(1))];
-// }
 // ==========================
 // 二阶 2D 多项式投影变换（工业级高精度）
 // GPS -> 地图坐标 [x, y]，几乎零误差
@@ -801,8 +743,8 @@
     }
 
     // ====================== ✅ WebSocket 合并版（不覆盖、自动追加） ======================
-    // const ws = new WebSocket('ws://8.129.91.23:8004');
-    const ws = new WebSocket('ws://localhost:8888');
+    const ws = new WebSocket('ws://8.129.91.23:8004');
+    // const ws = new WebSocket('ws://localhost:8888');
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
