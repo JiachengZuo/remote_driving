@@ -522,7 +522,7 @@
         <div class="info-box">
             <div class="info-text">
                 <span id="current-time">2026/05/18 17:23:27</span>
-                <span>系统状态: 正常</span>
+                <span>System Status: Normal</span>
             </div>
         </div>
     </div>
@@ -556,9 +556,6 @@
 
     <div class="center-panel">
         <div id="map-container"></div>
-        <!-- <div class="map-controls">
-            <div class="control-btn">🔍</div><div class="control-btn">↑</div><div class="control-btn">→</div><div class="control-btn">▤</div><div class="control-btn">—</div>
-        </div> -->
         <div class="alert-log">
             <div class="detail-title">ALERTS LOG</div>
             <div id="alertLog"></div>
@@ -576,17 +573,8 @@
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">LiDAR: <span id="sLidar">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Camera: <span id="sCam">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Radar: <span id="sRadar">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">mode: <span id="sMode">auto</span></div>
             <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div>
-        </div>
-
-        <!-- ========= 我加的：右侧小地图 ========= -->
-        <div class="mini-map-card">
-            <div class="detail-title">📍 LOCAL ZOOM VIEW</div>
-            <div id="miniMapWrap">
-                <div id="miniMapBg"></div>
-                <div class="mini-car-mark"></div>
-                <div id="miniCarName"></div>
-            </div>
         </div>
     </div>
 
@@ -630,41 +618,41 @@
         { gps: [-216.839, -199.682], map: [60, 47] },
         { gps: [-302.308, -270.715], map: [77, 35] },
         { gps: [-394.887, -235.785], map: [79, 15] },
-        { gps: [0.117, 1.425],      map: [15.9, 74.8] },
-        { gps: [9.780, -15.888],    map: [18.3, 77.7] },
-        { gps: [17.002, -21.852],   map: [18.8, 79.5] },
-        { gps: [23.574, -18.123],   map: [17.3, 81.0] },
-        { gps: [40.919, -24.688],   map: [17.5, 84.6] },
-        { gps: [39.512, -41.785],   map: [20.6, 87.9] },
-        { gps: [30.869, -11.202],   map: [15.9, 80.7] },
-        { gps: [20.577, -1.622],    map: [15.4, 78.5] },
-        { gps: [-0.905, 18.819],    map: [13.2, 72.4] },
-        { gps: [-23.235, 40.508],   map: [10.8, 67.2] },
-        { gps: [-51.294, 67.393],   map: [7.9, 59.8] },
-        { gps: [-63.855, 79.329],   map: [6.8, 56.2] },
-        { gps: [-91.341, 71.605],   map: [9.5, 50.8] },
-        { gps: [-99.880, 43.775],   map: [14.6, 50.5] },
-        { gps: [-234.427, -218.253],map: [65.1, 41.3] },
-        { gps: [-275.807, -251.143],map: [71.9, 35.3] },
-        { gps: [-304.196, -271.473],map: [78.2, 29.4] },
-        { gps: [-324.999, -275.323],map: [78.9, 26.6] },
-        { gps: [-347.620, -279.061],map: [80.8, 22.1] },
-        { gps: [-378.333, -257.899],map: [79.8, 14.3] },
-        { gps: [-388.305, -224.731],map: [75.0, 7.4] },
-        { gps: [-360.855, -192.070],map: [65.0, 12.5] },
-        { gps: [-333.256,-157.542],map: [58.3, 15.6] },
-        { gps: [-315.515, -130.490],map: [52.6, 17.9] },
-        { gps: [-306.615, -113.514],map: [49.2, 18.5] },
-        { gps: [-279.481, -55.692],  map: [40.4, 20.9] },
-        { gps: [-269.879, -39.511],  map: [37.2, 20.2] },
-        { gps: [-263.774, -21.783],  map: [34.5, 21.0] },
-        { gps: [-258.341, -3.302],   map: [31.2, 21.2] },
-        { gps: [-250.224, 41.206],   map: [23.6, 18.9] },
-        { gps: [-225.442, 61.279],   map: [19.3, 20.3] },
-        { gps: [-179.767, 71.782],   map: [16.5, 31.1] },
-        { gps: [-159.775, 75.214],   map: [13.0, 35.6] },
-        { gps: [-133.001, 79.880],    map: [9.8, 42.1] },
-        { gps: [-105.488, 84.713],   map: [7.8, 46.9] }
+        { gps: [0.117, 1.425],      map: [15.9, 73.3] },
+        { gps: [9.780, -15.888],    map: [18.3, 76.4] },
+        { gps: [17.002, -21.852],   map: [18.5, 77.9] },
+        { gps: [23.574, -18.123],   map: [17.3, 79.0] },
+        { gps: [40.919, -24.688],   map: [17.5, 82.6] },
+        { gps: [39.512, -41.785],   map: [20.5, 85.3] },
+        { gps: [30.869, -11.202],   map: [15.9, 79.0] },
+        { gps: [20.577, -1.622],    map: [15.0, 76.5] },
+        { gps: [-0.905, 18.819],    map: [13.2, 71.0] },
+        { gps: [-23.235, 40.508],   map: [10.7, 66.0] },//
+        { gps: [-51.294, 67.393],   map: [7.6, 59.2] },//
+        { gps: [-63.855, 79.329],   map: [6.8, 56.2] },//
+        { gps: [-91.341, 71.605],   map: [9.5, 50.8] },//
+        { gps: [-99.880, 43.775],   map: [14.6, 50.5] },//
+        { gps: [-234.427, -218.253],map: [65.1, 42.3] },//
+        { gps: [-275.807, -251.143],map: [72.5, 36.5] },//
+        { gps: [-304.196, -271.473],map: [78.2, 31.4] },//
+        { gps: [-324.999, -275.323],map: [79.3, 28.6] },//
+        { gps: [-347.620, -279.061],map: [81.5, 24.1] },//
+        { gps: [-378.333, -257.899],map: [80.2, 16.9] },//
+        { gps: [-388.305, -224.731],map: [76.0, 11.4] },//
+        { gps: [-360.855, -192.070],map: [66.0, 16.0] },//
+        { gps: [-333.256,-157.542],map: [58.0, 19.6] },//
+        { gps: [-315.515, -130.490],map: [52.0, 20.9] },//
+        { gps: [-306.615, -113.514],map: [49.2, 21.0] },//
+        { gps: [-279.481, -55.692],  map: [40.4, 22.9] },//
+        { gps: [-269.879, -39.511],  map: [37.8, 23.0] },//
+        { gps: [-263.774, -21.783],  map: [34.0, 23.0] },//
+        { gps: [-258.341, -3.302],   map: [31.2, 23.2] },//
+        { gps: [-250.224, 41.206],   map: [23.0, 21.5] },//
+        { gps: [-225.442, 61.279],   map: [18.7, 23.3] },//
+        { gps: [-179.767, 71.782],   map: [14.8, 32.1] },//
+        { gps: [-159.775, 75.214],   map: [12.5, 36.6] },//
+        { gps: [-133.001, 79.880],    map: [9.8, 42.1] },//
+        { gps: [-105.488, 84.713],   map: [7.8, 46.9] }//
     ];
 
     function gpsToMap(gpsX, gpsY) {
@@ -745,33 +733,6 @@
             data: []
         }]
     });
-
-    // ========= 真正精准、不偏移的小地图函数（我加的） =========
-    function refreshMiniMap(posX, posY, carId, isOffline, isFault) {
-        const mapW = 100;
-        const mapH = 100;
-        const scale = MINI_SCALE;
-
-        // let bgX = 135.5;
-        // let bgY = 110;
-        let bgX = (-posX + 50) * 3.973607038;
-        let bgY = (posY - 50) * 3.8354838;
-        // console.log(bgX, bgY);
-        miniMapBg.style.transform = `translate(${bgX}%, ${bgY}%) scale(${scale})`;
-        miniCarName.innerText = carId;
-
-        const markDom = document.querySelector('.mini-car-mark');
-        if(isOffline){
-            markDom.style.background='radial-gradient(circle,#999 40%,transparent 60%)';
-            markDom.style.boxShadow='0 0 8px #999';
-        }else if(isFault){
-            markDom.style.background='radial-gradient(circle,#ff4d4f 40%,transparent 60%)';
-            markDom.style.boxShadow='0 0 12px #ff4d4f';
-        }else{
-            markDom.style.background='radial-gradient(circle,#4aff77 40%,transparent 60%)';
-            markDom.style.boxShadow='0 0 12px #4aff77';
-        }
-    }
 
     function initPingChart(color = "#4aff77") {
         pingChart.setOption({
@@ -868,7 +829,7 @@
 
             const pos = gpsToMap(car.gps[0], car.gps[1]);
             let pointColor = isOffline ? '#aaa' : (isFault ? '#ff4d4f' : (carId.startsWith("AV-S")?"#4aff77":"#4a9eff"));
-
+//75.0, 7.4  75.0, 11.4
             mapPoints.push({
                 value: pos,
                 name: carId,
@@ -876,11 +837,6 @@
                 opacity: isOffline ? 0.4 : 1,
                 symbolSize: currentCar === carId ? 40 : 28
             });
-
-            // ========= 选中车辆 → 更新小地图 =========
-            if (currentCar === carId) {
-                refreshMiniMap(pos[0], pos[1], carId, isOffline, isFault);
-            }
         }
 
         if (!currentCar || !carData[currentCar]) {
@@ -902,6 +858,7 @@
             document.getElementById("sLidar").innerText = d.lidar || "-";
             document.getElementById("sCam").innerText = d.camera || "-";
             document.getElementById("sRadar").innerText = d.radar || "-";
+            document.getElementById("sMode").innerText = d.mode;
             document.getElementById("carAlert").innerText = isFault ? "⚠️ ABNORMAL" : "None";
             document.getElementById("carStatus").innerText = `(Status: ${isOffline ? "Offline" : (isFault ? "ALERT" : "Active")})`;
             document.getElementById("carStatus").style.color = isOffline ? "#aaa" : (isFault ? "#ff4d4f" : "#4aff77");
@@ -921,11 +878,11 @@
         for (const carId of Object.keys(carData)) {
             const car = carData[carId];
             if ((car.lidar === "Fault" || car.camera === "Degraded") && now - car.lastUpdate <= OFFLINE_TIMEOUT) {
-                log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} 异常</div>`;
+                log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} Abnormal</div>`;
                 hasFault = true;
             }
         }
-        logBox.innerHTML = hasFault ? log : `<div class="log-item">[${nowTime}] ✅ 全部正常</div>`;
+        logBox.innerHTML = hasFault ? log : `<div class="log-item">[${nowTime}] ✅ Everything is fine</div>`;
     }
 
     document.addEventListener("click", (e) => {
@@ -957,7 +914,7 @@
             const temp = data.current_condition[0].temp_C;
             const wind = data.current_condition[0].windspeedKmph;
             document.querySelector(".weather-text").innerHTML =
-                `<span>${desc}</span><span>${temp}℃</span><span>风速 ${wind} km/h</span>`;
+                `<span>${desc}</span><span>${temp}℃</span><span>wind speed: ${wind} km/h</span>`;
         } catch (e) {}
     }
     getWeather();

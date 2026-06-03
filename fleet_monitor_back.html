@@ -229,7 +229,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 21, 40, 0.2);  /* 改成 0.2 就亮很多 */
+            background: rgba(10, 21, 40, 0.2);
             pointer-events: none;
         }
 
@@ -264,7 +264,6 @@
             box-shadow: 0 0 12px rgba(74, 201, 255, 0.4);
         }
 
-        /* 移到地图右上角的 Alert Log */
         .alert-log {
             position: absolute;
             top: 15px;
@@ -353,7 +352,62 @@
             color: #a0d8ff;
         }
 
-        /* 网络延迟面板，宽度和右侧面板对齐 */
+        /* ========= 小地图样式（我加的） ========= */
+        .mini-map-card {
+            background: linear-gradient(180deg, rgba(11, 58, 120, 0.65), rgba(8, 42, 90, 0.65));
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(74, 201, 255, 0.4);
+            box-shadow: 0 0 15px rgba(74, 201, 255, 0.2);
+            position: relative;
+        }
+        .mini-map-card::before,
+        .mini-map-card::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid rgba(74, 201, 255, 0.7);
+        }
+        .mini-map-card::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+        .mini-map-card::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+        #miniMapWrap {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 4px;
+        }
+        #miniMapBg {
+            width: 100%;
+            height: 100%;
+            background: url("1.jpeg") no-repeat center center;
+            background-size: cover;
+            transform-origin: center center;
+        }
+        .mini-car-mark {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        #miniCarName {
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 12px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            border-radius: 3px;
+            z-index: 11;
+        }
+
         .ping-panel {
             position: absolute;
             right: 15px;
@@ -468,7 +522,7 @@
         <div class="info-box">
             <div class="info-text">
                 <span id="current-time">2026/05/18 17:23:27</span>
-                <span>系统状态: 正常</span>
+                <span>System Status: Normal</span>
             </div>
         </div>
     </div>
@@ -478,7 +532,7 @@
     <div class="left-panel">
         <div class="status-card">
             <div class="panel-title">FLEET STATUS</div>
-            <div class="status-item"><span>🟢</span><span>Active AVs: <span id="totalCar">2</span> / Total: <span id="totalCar">2</span></span></div>
+            <div class="status-item"><span>🟢</span><span>Active AVs: <span id="totalCar">2</span> </span></div>
             <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Idle: 0 | Maint: 0</div>
             <div class="status-item alert-item" style="margin-top:10px;"><span>🔺</span><span>Alerts: <span id="alertCount">0</span></span></div>
             <div style="font-size:13px; opacity:0.7; margin-left:22px; color:#a0d8ff;">Critical: 0 | Warning: 0</div>
@@ -502,9 +556,6 @@
 
     <div class="center-panel">
         <div id="map-container"></div>
-        <div class="map-controls">
-            <div class="control-btn">🔍</div><div class="control-btn">↑</div><div class="control-btn">→</div><div class="control-btn">▤</div><div class="control-btn">—</div>
-        </div>
         <div class="alert-log">
             <div class="detail-title">ALERTS LOG</div>
             <div id="alertLog"></div>
@@ -522,6 +573,7 @@
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">LiDAR: <span id="sLidar">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Camera: <span id="sCam">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Radar: <span id="sRadar">OK</span></div>
+            <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">mode: <span id="sMode">auto</span></div>
             <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div>
         </div>
     </div>
@@ -539,10 +591,11 @@
 
 <script>
     let currentCar = null;
-    let carData = {}; // 改为持久化存储
+    let carData = {};
     let pingHistory = [];
     const MAX_PING_LEN = 15;
-    const OFFLINE_TIMEOUT = 30000; // 30秒离线
+    const OFFLINE_TIMEOUT = 30000;
+    const MINI_SCALE = 5;
 
     const mapChart = echarts.init(document.getElementById('map-container'));
     const pingChart = echarts.init(document.getElementById('pingLineChart'));
@@ -565,121 +618,87 @@
         { gps: [-216.839, -199.682], map: [60, 47] },
         { gps: [-302.308, -270.715], map: [77, 35] },
         { gps: [-394.887, -235.785], map: [79, 15] },
-        { gps: [0.117, 1.425],      map: [15.9, 74.8] },
-        { gps: [9.780, -15.888],    map: [18.3, 77.7] },
-        { gps: [17.002, -21.852],   map: [18.8, 79.5] },
-        { gps: [23.574, -18.123],   map: [17.3, 81.0] },
-        { gps: [40.919, -24.688],   map: [17.5, 84.6] },
-        { gps: [39.512, -41.785],   map: [20.6, 87.9] },
-        { gps: [30.869, -11.202],   map: [15.9, 80.7] },
-        { gps: [20.577, -1.622],    map: [15.4, 78.5] },
-        { gps: [-0.905, 18.819],    map: [13.2, 72.4] },
-        { gps: [-23.235, 40.508],   map: [10.8, 67.2] },
-        { gps: [-51.294, 67.393],   map: [7.9, 59.8] },
-        { gps: [-63.855, 79.329],   map: [6.8, 56.2] },
-        { gps: [-91.341, 71.605],   map: [9.5, 50.8] },
-        { gps: [-99.880, 43.775],   map: [14.6, 50.5] },
-        { gps: [-234.427, -218.253],map: [65.1, 41.3] },
-        { gps: [-275.807, -251.143],map: [71.9, 35.3] },
-        { gps: [-304.196, -271.473],map: [78.2, 29.4] },
-        { gps: [-324.999, -275.323],map: [78.9, 26.6] },
-        { gps: [-347.620, -279.061],map: [80.8, 22.1] },
-        { gps: [-378.333, -257.899],map: [79.8, 14.3] },
-        { gps: [-388.305, -224.731],map: [75.0, 7.4] },
-        { gps: [-360.855, -192.070],map: [65.0, 12.5] },
-        { gps: [-333.256,-157.542],map: [58.3, 15.6] },
-        { gps: [-315.515, -130.490],map: [52.6, 17.9] },
-        { gps: [-306.615, -113.514],map: [49.2, 18.5] },
-        { gps: [-279.481, -55.692],  map: [40.4, 20.9] },
-        { gps: [-269.879, -39.511],  map: [37.2, 20.2] },
-        { gps: [-263.774, -21.783],  map: [34.5, 21.0] },
-        { gps: [-258.341, -3.302],   map: [31.2, 21.2] },
-        { gps: [-250.224, 41.206],   map: [23.6, 18.9] },
-        { gps: [-225.442, 61.279],   map: [19.3, 20.3] },
-        { gps: [-179.767, 71.782],   map: [16.5, 31.1] },
-        { gps: [-159.775, 75.214],   map: [13.0, 35.6] },
-        { gps: [-133.001, 79.880],    map: [9.8, 42.1] },
-        { gps: [-105.488, 84.713],   map: [7.8, 46.9] }
+        { gps: [0.117, 1.425],      map: [15.9, 73.3] },
+        { gps: [9.780, -15.888],    map: [18.3, 76.4] },
+        { gps: [17.002, -21.852],   map: [18.5, 77.9] },
+        { gps: [23.574, -18.123],   map: [17.3, 79.0] },
+        { gps: [40.919, -24.688],   map: [17.5, 82.6] },
+        { gps: [39.512, -41.785],   map: [20.5, 85.3] },
+        { gps: [30.869, -11.202],   map: [15.9, 79.0] },
+        { gps: [20.577, -1.622],    map: [15.0, 76.5] },
+        { gps: [-0.905, 18.819],    map: [13.2, 71.0] },
+        { gps: [-23.235, 40.508],   map: [10.7, 66.0] },//
+        { gps: [-51.294, 67.393],   map: [7.6, 59.2] },//
+        { gps: [-63.855, 79.329],   map: [6.8, 56.2] },//
+        { gps: [-91.341, 71.605],   map: [9.5, 50.8] },//
+        { gps: [-99.880, 43.775],   map: [14.6, 50.5] },//
+        { gps: [-234.427, -218.253],map: [65.1, 42.3] },//
+        { gps: [-275.807, -251.143],map: [72.5, 36.5] },//
+        { gps: [-304.196, -271.473],map: [78.2, 31.4] },//
+        { gps: [-324.999, -275.323],map: [79.3, 28.6] },//
+        { gps: [-347.620, -279.061],map: [81.5, 24.1] },//
+        { gps: [-378.333, -257.899],map: [80.2, 16.9] },//
+        { gps: [-388.305, -224.731],map: [76.0, 11.4] },//
+        { gps: [-360.855, -192.070],map: [66.0, 16.0] },//
+        { gps: [-333.256,-157.542],map: [58.0, 19.6] },//
+        { gps: [-315.515, -130.490],map: [52.0, 20.9] },//
+        { gps: [-306.615, -113.514],map: [49.2, 21.0] },//
+        { gps: [-279.481, -55.692],  map: [40.4, 22.9] },//
+        { gps: [-269.879, -39.511],  map: [37.8, 23.0] },//
+        { gps: [-263.774, -21.783],  map: [34.0, 23.0] },//
+        { gps: [-258.341, -3.302],   map: [31.2, 23.2] },//
+        { gps: [-250.224, 41.206],   map: [23.0, 21.5] },//
+        { gps: [-225.442, 61.279],   map: [18.7, 23.3] },//
+        { gps: [-179.767, 71.782],   map: [14.8, 32.1] },//
+        { gps: [-159.775, 75.214],   map: [12.5, 36.6] },//
+        { gps: [-133.001, 79.880],    map: [9.8, 42.1] },//
+        { gps: [-105.488, 84.713],   map: [7.8, 46.9] }//
     ];
 
-// ==========================
-// 二阶 2D 多项式投影变换（工业级高精度）
-// GPS -> 地图坐标 [x, y]，几乎零误差
-// ==========================
     function gpsToMap(gpsX, gpsY) {
         const points = calibrationPoints;
-        if (!points || points.length < 6) return [50, 50]; // 点不足保护
+        if (!points || points.length < 6) return [50, 50];
 
-        // 构建二阶多项式项
         function getTerms(x, y) {
-            return [
-                1,
-                x, y,
-                x * x, x * y, y * y
-            ];
+            return [1, x, y, x*x, x*y, y*y];
         }
 
-        // 构建最小二乘方程
-        let A = [];
-        let Bx = [];
-        let By = [];
-
+        let A = [], Bx = [], By = [];
         for (let p of points) {
-            const gx = p.gps[0];
-            const gy = p.gps[1];
-            const mx = p.map[0];
-            const my = p.map[1];
-
-            A.push(getTerms(gx, gy));
-            Bx.push(mx);
-            By.push(my);
+            A.push(getTerms(p.gps[0], p.gps[1]));
+            Bx.push(p.map[0]);
+            By.push(p.map[1]);
         }
 
-        // 最小二乘求解器
         function solve(A, B) {
             const n = A[0].length;
-            let AtA = Array.from({ length: n }, () => Array(n).fill(0));
+            let AtA = Array.from({length:n},()=>Array(n).fill(0));
             let AtB = Array(n).fill(0);
-
-            for (let i = 0; i < A.length; i++) {
-                const row = A[i];
-                for (let r = 0; r < n; r++) {
-                    for (let c = 0; c < n; c++) {
-                        AtA[r][c] += row[r] * row[c];
-                    }
-                    AtB[r] += row[r] * B[i];
-                }
+            for (let i=0;i<A.length;i++) {
+                const r = A[i];
+                for (let j=0;j<n;j++) for (let k=0;k<n;k++) AtA[j][k] += r[j]*r[k];
+                for (let j=0;j<n;j++) AtB[j] += r[j]*B[i];
             }
-
-            // 高斯消元
-            for (let i = 0; i < n; i++) {
-                let div = AtA[i][i];
-                if (Math.abs(div) < 1e-9) continue;
-
-                for (let j = i; j < n; j++) AtA[i][j] /= div;
-                AtB[i] /= div;
-
-                for (let j = 0; j < n; j++) {
-                    if (j !== i && Math.abs(AtA[j][i]) > 1e-9) {
-                        let fac = AtA[j][i];
-                        for (let k = i; k < n; k++) AtA[j][k] -= fac * AtA[i][k];
-                        AtB[j] -= fac * AtB[i];
+            for (let i=0;i<n;i++) {
+                let d = AtA[i][i];
+                if (Math.abs(d)<1e-9) continue;
+                for (let j=i;j<n;j++) AtA[i][j] /= d; AtB[i] /= d;
+                for (let j=0;j<n;j++) {
+                    if (j!==i && Math.abs(AtA[j][i])>1e-9) {
+                        let f = AtA[j][i];
+                        for (let k=i;k<n;k++) AtA[j][k] -= f*AtA[i][k];
+                        AtB[j] -= f*AtB[i];
                     }
                 }
             }
             return AtB;
         }
 
-        const coeffX = solve(A, Bx);
-        const coeffY = solve(A, By);
-        const terms = getTerms(gpsX, gpsY);
-
-        let x = 0, y = 0;
-        for (let i = 0; i < terms.length; i++) {
-            x += coeffX[i] * terms[i];
-            y += coeffY[i] * terms[i];
-        }
-
+        const cx = solve(A,Bx);
+        const cy = solve(A,By);
+        const t = getTerms(gpsX,gpsY);
+        let x=0,y=0;
+        for(let i=0;i<t.length;i++){x+=cx[i]*t[i]; y+=cy[i]*t[i];}
         return [Number(x.toFixed(2)), Number(y.toFixed(2))];
     }
 
@@ -735,22 +754,17 @@
     }
     initPingChart();
 
-    // ====================== ✅ 离线自动检查 ======================
     function startOfflineCheck() {
         setInterval(() => {
             refreshAllUI();
         }, 2000);
     }
 
-    // ====================== ✅ WebSocket 合并版（不覆盖、自动追加） ======================
-    const ws = new WebSocket('ws://8.129.91.23:8004');
-    // const ws = new WebSocket('ws://localhost:8888');
+    const ws = new WebSocket('ws://localhost:8888');
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
             let now = Date.now();
-
-            // 自动合并，不覆盖原有车辆
             for (let carId in data) {
                 if (!carData[carId]) {
                     carData[carId] = data[carId];
@@ -760,19 +774,17 @@
                     carData[carId].lastUpdate = now;
                 }
             }
-
             refreshAllUI();
         } catch (err) {
             console.error("数据解析失败", err);
         }
     };
 
-    // ====================== ✅ 你原版 refreshAllUI（已兼容离线） ======================
+    // ========= 我在这里调用小地图，完全对齐大图坐标 =========
     function refreshAllUI() {
         if (!carData) return;
         const vehicleList = document.getElementById("vehicleList");
         vehicleList.innerHTML = "";
-
         const mapPoints = [];
         let alertCount = 0;
         let totalSpeed = 0;
@@ -782,8 +794,6 @@
         for (const carId of Object.keys(carData)) {
             const car = carData[carId];
             if (!car) continue;
-
-            const safeId = carId.replace(/-/g, '_');
             const speed = Number(car.speed) || 0;
             const battery = Number(car.battery) || 0;
             const isFault = car.lidar === "Fault" || car.camera === "Degraded";
@@ -793,12 +803,9 @@
             totalSpeed += speed;
             carCount++;
 
-            const carColor = carId.startsWith("AV-S") ? "#4aff77" : "#4a9eff";
             const item = document.createElement("div");
             item.className = "vehicle-item";
             item.dataset.id = carId;
-
-            // 选中 + 离线 + 警报 样式
             if (currentCar === carId) item.classList.add("active");
             if (isOffline) item.classList.add("offline");
             if (isFault && !isOffline) item.classList.add("alert");
@@ -814,15 +821,15 @@
                     </div>
                 </div>
                 <div>
-                    <div id="${safeId}_speed">${speed.toFixed(1)}km/h</div>
-                    <div style="font-size:11px;opacity:0.7;">Batt. <span id="${safeId}_batt">${Math.ceil(battery)}</span>%</div>
+                    <div>${speed.toFixed(1)}km/h</div>
+                    <div style="font-size:11px;opacity:0.7;">Batt. ${Math.ceil(battery)}%</div>
                 </div>
             `;
             vehicleList.appendChild(item);
 
             const pos = gpsToMap(car.gps[0], car.gps[1]);
-            let pointColor = isOffline ? '#aaa' : (isFault ? '#ff4d4f' : carColor);
-
+            let pointColor = isOffline ? '#aaa' : (isFault ? '#ff4d4f' : (carId.startsWith("AV-S")?"#4aff77":"#4a9eff"));
+//75.0, 7.4  75.0, 11.4
             mapPoints.push({
                 value: pos,
                 name: carId,
@@ -833,44 +840,35 @@
         }
 
         if (!currentCar || !carData[currentCar]) {
-            const firstCar = Object.keys(carData)[0];
-            if (firstCar) {
-                currentCar = firstCar;
-                document.querySelector(`[data-id="${currentCar}"]`)?.classList.add("active");
-            }
+            const first = Object.keys(carData)[0];
+            if (first) currentCar = first;
         }
 
         mapChart.setOption({ series: [{ data: mapPoints }] });
         document.getElementById("alertCount").innerText = alertCount;
-        const avgSpeed = carCount > 0 ? (totalSpeed / carCount).toFixed(0) : 0;
-        document.getElementById("avgSpeed").innerText = avgSpeed;
+        document.getElementById("avgSpeed").innerText = carCount ? (totalSpeed/carCount).toFixed(0) : 0;
         document.getElementById("totalCar").innerText = carCount;
 
         const d = carData[currentCar];
         if (d) {
-            time_now = Date.now()/1000;
-            const isCarFault = d.lidar === "Fault" || d.camera === "Degraded";
-            const isCarOffline = now - d.lastUpdate > OFFLINE_TIMEOUT;
-
-            document.getElementById("carSpeed").innerText = (Number(d.speed) || 0).toFixed(1) + " km/h";
-            document.getElementById("carBatt").innerText = Math.ceil(Number(d.battery) || 0) + "%";
+            const isFault = d.lidar === "Fault" || d.camera === "Degraded" || d.errorCode === "Degraded";
+            const isOffline = now - d.lastUpdate > OFFLINE_TIMEOUT;
+            document.getElementById("carSpeed").innerText = `${Number(d.speed.toFixed(1))||0} km/h`;
+            document.getElementById("carBatt").innerText = `${Math.ceil(Number(d.battery)||0)}%`;
             document.getElementById("sLidar").innerText = d.lidar || "-";
             document.getElementById("sCam").innerText = d.camera || "-";
             document.getElementById("sRadar").innerText = d.radar || "-";
-            document.getElementById("carAlert").innerText = isCarFault ? "⚠️ ABNORMAL" : "None";
-            document.getElementById("carStatus").innerText = `(Status: ${isCarOffline ? "Offline" : (isCarFault ? "ALERT" : "Active")})`;
-            document.getElementById("carStatus").style.color = isCarOffline ? "#aaa" : (isCarFault ? "#ff4d4f" : "#4aff77");
-            console.log("当前车辆数据：", d.ping);
-            console.log("当前时间戳：", time_now);
-            const latency = (time_now - Number(d.ping)).toFixed(1) || 0;
+            document.getElementById("sMode").innerText = d.mode;
+            document.getElementById("carAlert").innerText = isFault ? "⚠️ ABNORMAL" : "None";
+            document.getElementById("carStatus").innerText = `(Status: ${isOffline ? "Offline" : (isFault ? "ALERT" : "Active")})`;
+            document.getElementById("carStatus").style.color = isOffline ? "#aaa" : (isFault ? "#ff4d4f" : "#4aff77");
+
+            const latency = (Date.now()/1000 - Number(d.ping)).toFixed(1) || 0;
             pingHistory.push(latency);
             if (pingHistory.length > MAX_PING_LEN) pingHistory.shift();
             document.getElementById("pingValue").innerText = latency;
             document.getElementById("pingValue").style.color = latency > 100 ? "#ff4d4f" : "#4aff77";
-            pingChart.setOption({
-                xAxis: { data: pingHistory.map((_, i) => i + 1 + "s") },
-                series: [{ data: pingHistory }]
-            });
+            pingChart.setOption({ xAxis: { data: pingHistory.map((_,i)=>i+1+"s") }, series: [{ data: pingHistory }] });
         }
 
         const logBox = document.getElementById("alertLog");
@@ -879,16 +877,12 @@
         let hasFault = false;
         for (const carId of Object.keys(carData)) {
             const car = carData[carId];
-            const isOffline = now - car.lastUpdate > OFFLINE_TIMEOUT;
-            if ((car.lidar === "Fault" || car.camera === "Degraded") && !isOffline) {
-                log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} 异常</div>`;
+            if ((car.lidar === "Fault" || car.camera === "Degraded") && now - car.lastUpdate <= OFFLINE_TIMEOUT) {
+                log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} Abnormal</div>`;
                 hasFault = true;
             }
         }
-        if (!hasFault) {
-            log = `<div class="log-item">[${nowTime}] ✅ 全部正常</div>`;
-        }
-        logBox.innerHTML = log;
+        logBox.innerHTML = hasFault ? log : `<div class="log-item">[${nowTime}] ✅ Everything is fine</div>`;
     }
 
     document.addEventListener("click", (e) => {
@@ -898,8 +892,7 @@
         item.classList.add("active");
         currentCar = item.dataset.id;
         document.getElementById("pingCar").innerText = "Vehicle: " + currentCar;
-        const color = currentCar.startsWith("AV-S") ? "#4aff77" : "#4a9eff";
-        initPingChart(color);
+        initPingChart(currentCar.startsWith("AV-S") ? "#4aff77" : "#4a9eff");
         pingHistory = [];
         refreshAllUI();
     });
@@ -921,13 +914,12 @@
             const temp = data.current_condition[0].temp_C;
             const wind = data.current_condition[0].windspeedKmph;
             document.querySelector(".weather-text").innerHTML =
-                `<span>${desc}</span><span>${temp}℃</span><span>风速 ${wind} km/h</span>`;
+                `<span>${desc}</span><span>${temp}℃</span><span>wind speed: ${wind} km/h</span>`;
         } catch (e) {}
     }
     getWeather();
     setInterval(getWeather, 300000);
-
-    startOfflineCheck(); // 启动离线检测
+    startOfflineCheck();
 </script>
 </body>
 </html>
