@@ -556,10 +556,10 @@
 
     <div class="center-panel">
         <div id="map-container"></div>
-        <div class="alert-log">
+        <!-- <div class="alert-log">
             <div class="detail-title">ALERTS LOG</div>
             <div id="alertLog"></div>
-        </div>
+        </div> -->
     </div>
 
     <div class="right-panel">
@@ -574,11 +574,11 @@
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Camera: <span id="sCam">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">Radar: <span id="sRadar">OK</span></div>
             <div style="font-size:12px; margin-left:15px; color:#a0d8ff;">mode: <span id="sMode">auto</span></div>
-            <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div>
+            <!-- <div class="detail-row"><span>Alerts:</span><span id="carAlert">None</span></div> -->
         </div>
     </div>
 
-    <div class="ping-panel">
+<div class="ping-panel" style="display: none;">
         <div class="ping-title">📶 NETWORK LATENCY MONITOR</div>
         <div class="ping-info-row">
             <span class="ping-value" id="pingValue">0</span>
@@ -760,7 +760,8 @@
         }, 2000);
     }
 
-    const ws = new WebSocket('ws://localhost:8888');
+    // const ws = new WebSocket('ws://localhost:8888');
+    const ws = new WebSocket('ws://8.129.91.23:8004');
     ws.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
@@ -795,7 +796,7 @@
             const car = carData[carId];
             if (!car) continue;
             const speed = Number(car.speed) || 0;
-            const battery = Number(car.battery) || 0;
+            const battery = ((Number(car.battery) || 0) > 100) ? ((Number(car.battery) || 0) / 10) : (Number(car.battery) || 0);
             const isFault = car.lidar === "Fault" || car.camera === "Degraded";
             const isOffline = now - car.lastUpdate > OFFLINE_TIMEOUT;
 
@@ -854,12 +855,12 @@
             const isFault = d.lidar === "Fault" || d.camera === "Degraded" || d.errorCode === "Degraded";
             const isOffline = now - d.lastUpdate > OFFLINE_TIMEOUT;
             document.getElementById("carSpeed").innerText = `${Number(d.speed.toFixed(1))||0} km/h`;
-            document.getElementById("carBatt").innerText = `${Math.ceil(Number(d.battery)||0)}%`;
+            document.getElementById("carBatt").innerText = `${Math.ceil(((Number(d.battery) || 0) > 100) ? ((Number(d.battery) || 0) / 10) : (Number(d.battery) || 0))}%`;
             document.getElementById("sLidar").innerText = d.lidar || "-";
             document.getElementById("sCam").innerText = d.camera || "-";
             document.getElementById("sRadar").innerText = d.radar || "-";
             document.getElementById("sMode").innerText = d.mode;
-            document.getElementById("carAlert").innerText = isFault ? "⚠️ ABNORMAL" : "None";
+            // document.getElementById("carAlert").innerText = isFault ? "⚠️ ABNORMAL" : "None";
             document.getElementById("carStatus").innerText = `(Status: ${isOffline ? "Offline" : (isFault ? "ALERT" : "Active")})`;
             document.getElementById("carStatus").style.color = isOffline ? "#aaa" : (isFault ? "#ff4d4f" : "#4aff77");
 
@@ -871,18 +872,18 @@
             pingChart.setOption({ xAxis: { data: pingHistory.map((_,i)=>i+1+"s") }, series: [{ data: pingHistory }] });
         }
 
-        const logBox = document.getElementById("alertLog");
-        const nowTime = new Date().toLocaleTimeString();
-        let log = "";
-        let hasFault = false;
-        for (const carId of Object.keys(carData)) {
-            const car = carData[carId];
-            if ((car.lidar === "Fault" || car.camera === "Degraded") && now - car.lastUpdate <= OFFLINE_TIMEOUT) {
-                log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} Abnormal</div>`;
-                hasFault = true;
-            }
-        }
-        logBox.innerHTML = hasFault ? log : `<div class="log-item">[${nowTime}] ✅ Everything is fine</div>`;
+        // const logBox = document.getElementById("alertLog");
+        // const nowTime = new Date().toLocaleTimeString();
+        // let log = "";
+        // let hasFault = false;
+        // for (const carId of Object.keys(carData)) {
+        //     const car = carData[carId];
+        //     if ((car.lidar === "Fault" || car.camera === "Degraded") && now - car.lastUpdate <= OFFLINE_TIMEOUT) {
+        //         log += `<div class="log-item">[${nowTime}] ⚠️ ${carId} Abnormal</div>`;
+        //         hasFault = true;
+        //     }
+        // }
+        // logBox.innerHTML = hasFault ? log : `<div class="log-item">[${nowTime}] ✅ Everything is fine</div>`;
     }
 
     document.addEventListener("click", (e) => {
